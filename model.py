@@ -111,7 +111,7 @@ def receive_messages(sock, port):
             data, addr = sock.recvfrom(1024)
             timestamp = datetime.datetime.now().strftime("%H:%M:%S")
             print(f'[{timestamp}] Сообщение от {addr[0]}: {data.decode("utf-8")}')
-            print('Введите сообщение: ', end='', flush=True)
+            print('Введите сообщение >>> ', end='', flush=True)
         except socket.timeout:
             continue
         except Exception as e:
