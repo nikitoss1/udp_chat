@@ -25,7 +25,15 @@ class Network:
                 if addr[:3] == '192':
                     return addr
             raise NetworkIPError("Не найден сетевой IP")
+
+
+        def search_local_ip(addrs):
+            for addr in addrs:
+                if addr[:3] == '127':
+                    return addr
+            raise NetworkIPError("Не найден сетевой IP")      
         
+
         try:
             self.__hostname = socket.gethostname()
         except socket.error as e:
@@ -33,13 +41,6 @@ class Network:
         except Exception as e:
             raise HostnameError(f'Неожиданная ошибка получения имени хоста: {e}') from e
 
-        try:
-            self.__local_ip = socket.gethostbyname(self.__hostname)
-        except socket.error as e:
-            raise LocalIPError(f'Ошибка получения локального IP: {e}') from e
-        except Exception as e:
-            raise LocalIPError(f'Неожиданная ошибка получения локального IP: {e}') from e
-    
         try: 
             interfaces = netifaces.interfaces()
             if not interfaces:
@@ -47,10 +48,15 @@ class Network:
             nets = []
 
             for interface in interfaces:
-                ip = netifaces.ifaddresses(interface)[2][0]['addr']
-                nets.append(ip)
-
+                if 2 in netifaces.ifaddresses(interface).keys():
+                    ip = netifaces.ifaddresses(interface)[2][0]['addr']
+                    nets.append(ip)
+                else:
+                    continue
+            
+            self.__local_ip = search_local_ip(nets)
             self.__network_ip = search_net_ip(nets)
+            
         except socket.error as e:
             raise NetworkIPError(f'Ошибка получения сетевого IP: {e}') from e
         except Exception as e:
